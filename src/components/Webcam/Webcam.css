@@ -1,0 +1,6 @@
+/* src/components/Webcam/Webcam.css */
+.webcam-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
