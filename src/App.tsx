@@ -1,9 +1,8 @@
 // src/App.tsx
 import React, { useRef, useState } from "react";
-import "./App.css";
-import Webcam from "./components/Webcam/Webcam";
-import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
-import PasswordManager from "./components/PasswordManager/PasswordManager";
+import Webcam from "./components/Webcam";
+import FaceRecognition from "./components/FaceRecognition";
+import PasswordManager from "./components/PasswordManager";
 
 const App: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -19,29 +18,33 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="App">
-      <h1>Password Manager with Face Recognition</h1>
-      {error && <p className="error">{error}</p>}
-      {!isAuthenticated ? (
-        <>
-          <Webcam
-            videoRef={videoRef}
-            onStreamStart={() => {}}
-            onStreamError={handleError}
-          />
-          <FaceRecognition
-            videoRef={videoRef}
-            onAuthenticated={handleAuthenticated}
-            onError={handleError}
-          />
-          <p>
-            Please position your face within the camera view to authenticate.
-          </p>
-        </>
-      ) : (
-        <PasswordManager />
-      )}
-    </div>
+    <>
+      <h1 className="text-3xl font-bold my-18">
+        Password Manager with Face Recognition
+      </h1>
+      <div className="flex flex-col items-center p-4">
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {!isAuthenticated ? (
+          <div className="flex flex-col items-center">
+            <Webcam
+              videoRef={videoRef}
+              onStreamStart={() => {}}
+              onStreamError={handleError}
+            />
+            <FaceRecognition
+              videoRef={videoRef}
+              onAuthenticated={handleAuthenticated}
+              onError={handleError}
+            />
+            <p className="text-gray-200 mt-4">
+              Please position your face within the camera view to authenticate.
+            </p>
+          </div>
+        ) : (
+          <PasswordManager />
+        )}
+      </div>
+    </>
   );
 };
 

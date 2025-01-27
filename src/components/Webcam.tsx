@@ -1,6 +1,5 @@
-// src/components/Webcam/Webcam.tsx
+// src/components/Webcam.tsx
 import React, { useEffect } from "react";
-import "./Webcam.css";
 
 interface WebcamProps {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -36,8 +35,8 @@ const Webcam: React.FC<WebcamProps> = ({
   }, [videoRef, onStreamStart, onStreamError]);
 
   return (
-    <div className="webcam-container">
-      <video ref={videoRef} autoPlay muted width="720" height="560" />
+    <div className="flex justify-center items-center">
+      <video ref={videoRef} autoPlay muted className="w-[720px] h-[560px]" />
     </div>
   );
 };

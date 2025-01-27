@@ -1,7 +1,6 @@
-// src/components/PasswordManager/PasswordManager.tsx
+// src/components/PasswordManager.tsx
 import React, { useState, useEffect } from "react";
-import { encryptPassword, decryptPassword } from "../../utils/crypto";
-import "./PasswordManager.css";
+import { encryptPassword, decryptPassword } from "../utils/crypto";
 
 interface PasswordEntry {
   id: string;
@@ -46,33 +45,28 @@ const PasswordManager: React.FC = () => {
   };
 
   return (
-    <div className="password-manager">
-      <h3>Add New Password</h3>
-      <input
-        type="text"
-        placeholder="Service Name"
-        value={newPasswordName}
-        onChange={(e) => setNewPasswordName(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={newPasswordValue}
-        onChange={(e) => setNewPasswordValue(e.target.value)}
-      />
-      <button onClick={handleAddPassword}>Add Password</button>
-
-      <h3>Your Passwords</h3>
-      <ul>
-        {passwords.map((entry) => (
-          <li key={entry.id}>
-            <strong>{entry.name}:</strong> {decryptPassword(entry.password)}
-            <button onClick={() => handleDeletePassword(entry.id)}>
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+    <div className="">
+      <section className="w-xl p-6 rounded-lg justify-center align-center shadow-md">
+        <h3 className="text-xl font-bold mb-4">Your Passwords</h3>
+        <ul className="list-none p-0">
+          {passwords.map((entry) => (
+            <li
+              key={entry.id}
+              className="flex justify-between items-center gap-2 py-2 border-b"
+            >
+              <span>
+                <strong>{entry.name}:</strong> {decryptPassword(entry.password)}
+              </span>
+              <button
+                onClick={() => handleDeletePassword(entry.id)}
+                className="bg-[#0a0a0a] text-white hover:text-red-600 px-3 py-1 rounded-lg border border-transparent hover:border-red-600 transition"
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 };

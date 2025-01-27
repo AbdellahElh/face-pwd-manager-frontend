@@ -1,4 +1,4 @@
-// src/components/FaceRecognition/FaceRecognition.tsx
+// src/components/FaceRecognition.tsx
 import React, { useEffect, useState, useCallback } from "react";
 import * as faceapi from "face-api.js";
 
