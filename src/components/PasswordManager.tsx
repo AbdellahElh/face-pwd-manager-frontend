@@ -2,7 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { encryptPassword, decryptPassword } from "../utils/crypto";
 import AddPwd from "./AddPwd";
-import { ChevronLeftIcon, PlusIcon, TrashIcon } from "./icons/Icons";
+import {
+  ChevronLeftIcon,
+  PlusIcon,
+  TrashIcon,
+  EyeIcon,
+  EyeOffIcon,
+} from "./icons/Icons";
 
 interface PasswordEntry {
   id: string;
@@ -13,6 +19,10 @@ interface PasswordEntry {
 const PasswordManager: React.FC = () => {
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [showAddPassword, setShowAddPassword] = useState<boolean>(false);
+  // This state tracks which password entries are visible (i.e. not masked)
+  const [visiblePasswords, setVisiblePasswords] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   useEffect(() => {
     const storedPasswords = localStorage.getItem("passwords");
@@ -40,6 +50,11 @@ const PasswordManager: React.FC = () => {
     localStorage.setItem("passwords", JSON.stringify(updatedPasswords));
   };
 
+  // Toggle the visibility state for a given password entry.
+  const toggleVisibility = (id: string) => {
+    setVisiblePasswords((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
     <div>
       <section className="w-md">
@@ -61,15 +76,33 @@ const PasswordManager: React.FC = () => {
               key={entry.id}
               className="flex justify-between items-center gap-2 py-2 border-b"
             >
-              <span>
-                <strong>{entry.name}:</strong> {decryptPassword(entry.password)}
-              </span>
-              <button
-                onClick={() => handleDeletePassword(entry.id)}
-                className="flex flex-row items-center gap-2 bg-[#0a0a0a] text-white hover:text-red-600 px-3 py-1 rounded-lg border border-transparent hover:border-red-600 transition"
-              >
-                <TrashIcon /> Delete
-              </button>
+              <div className="flex items-center gap-2">
+                <strong>{entry.name}:</strong>
+                <span>
+                  {visiblePasswords[entry.id]
+                    ? decryptPassword(entry.password)
+                    : "••••••••"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => toggleVisibility(entry.id)}
+                  className="hover:text-gray-700"
+                  title={
+                    visiblePasswords[entry.id]
+                      ? "Hide password"
+                      : "Show password"
+                  }
+                >
+                  {visiblePasswords[entry.id] ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+                <button
+                  onClick={() => handleDeletePassword(entry.id)}
+                  className="flex flex-row items-center gap-2 bg-[#0a0a0a] text-white hover:text-red-600 px-3 py-1 rounded-lg border border-transparent hover:border-red-600 transition"
+                >
+                  <TrashIcon /> Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
