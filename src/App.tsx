@@ -18,14 +18,18 @@ const App: React.FC = () => {
   };
 
   return (
-    <>
-      <h1 className="text-3xl font-bold my-18">
+    <div className="container mt-20 mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold my-8 text-center">
         Password Manager with Face Recognition
       </h1>
       <div className="flex flex-col items-center p-4">
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && (
+          <p className="text-red-500 mb-4 text-sm sm:text-base text-center">
+            {error}
+          </p>
+        )}
         {!isAuthenticated ? (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center space-y-4 sm:space-y-6">
             <Webcam
               videoRef={videoRef}
               onStreamStart={() => {}}
@@ -36,7 +40,7 @@ const App: React.FC = () => {
               onAuthenticated={handleAuthenticated}
               onError={handleError}
             />
-            <p className="text-gray-200 mt-4">
+            <p className="text-gray-200 mt-4 text-xs sm:text-sm md:text-base text-center">
               Please position your face within the camera view to authenticate.
             </p>
           </div>
@@ -44,7 +48,7 @@ const App: React.FC = () => {
           <PasswordManager />
         )}
       </div>
-    </>
+    </div>
   );
 };
 

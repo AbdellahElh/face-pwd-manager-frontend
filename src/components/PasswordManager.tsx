@@ -18,7 +18,6 @@ interface PasswordEntry {
   notes?: string;
 }
 
-// Use the Vite prefix for your environment variable.
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL as string;
 
 const PasswordManager: React.FC = () => {
@@ -43,8 +42,6 @@ const PasswordManager: React.FC = () => {
       );
   }, []);
 
-  // Now we expect the add method to provide the title and password.
-  // Here we use a static website and username for demonstration purposes.
   const handleAddCredential = (title: string, password: string) => {
     const newCredential = {
       title,
@@ -88,48 +85,60 @@ const PasswordManager: React.FC = () => {
 
   return (
     <div>
-      <section className="w-md">
+      <section className="mb-6">
         <button
           onClick={() => setShowAddCredential(!showAddCredential)}
-          className="flex flex-row items-center gap-2 mb-6 bg-[#0a0a0a] text-white hover:text-blue-600 rounded-lg border border-transparent hover:border-blue-600 transition"
+          className="flex items-center gap-2 mb-4 bg-[#0a0a0a] text-white hover:text-blue-600 rounded-lg border border-transparent hover:border-blue-600 transition px-4 py-2"
+          title="Add new credential"
         >
           {showAddCredential ? <ChevronLeftIcon /> : <PlusIcon />} New
         </button>
-
         {showAddCredential && <AddPwd onAddCredential={handleAddCredential} />}
       </section>
 
-      <section className="w-xl p-6 rounded-lg justify-center align-center shadow-md">
-        <h3 className="text-xl font-bold mb-4">Your Credentials</h3>
-        <ul className="list-none p-0">
+      <section className="rounded-lg p-6 shadow-[0_0_5px_0_rgba(255,255,255,0.5)]">
+        <h3 className="text-xl md:text-2xl font-bold mb-4">Your Credentials</h3>
+        <ul className="divide-y divide-gray-200">
           {credentials.map((entry) => (
             <li
               key={entry.id}
-              className="flex justify-between items-center gap-2 py-2 border-b"
+              className="flex items-center justify-between py-2 whitespace-nowrap"
             >
-              <div className="flex items-center gap-2">
-                <strong>{entry.title}:</strong>
-                <span>
+              {/* Left side: Credential text, which can shrink with truncation */}
+              <div className="flex-1 flex items-center lg:w-md md:w-sm sm:w-xs xs:w-xxs gap-x-2 md:gap-x-4 overflow-hidden">
+                <strong className="text-sm md:text-base truncate">
+                  {entry.title}:
+                </strong>
+                <span className="text-xs md:text-sm truncate">
                   {visiblePasswords[entry.id] ? entry.password : "••••••••"}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              {/* Right side: Action buttons */}
+              <div className="flex items-center gap-x-2 justify-end">
                 <button
                   onClick={() => toggleVisibility(entry.id)}
-                  className="hover:text-gray-700"
+                  className="hover:text-gray-700 flex-shrink-0"
                   title={
                     visiblePasswords[entry.id]
                       ? "Hide password"
                       : "Show password"
                   }
                 >
-                  {visiblePasswords[entry.id] ? <EyeOffIcon /> : <EyeIcon />}
+                  {visiblePasswords[entry.id] ? (
+                    <EyeOffIcon className="h-4 w-4 md:h-5 md:w-5" />
+                  ) : (
+                    <EyeIcon className="h-4 w-4 md:h-5 md:w-5" />
+                  )}
                 </button>
                 <button
                   onClick={() => handleDeleteCredential(entry.id)}
-                  className="flex flex-row items-center gap-2 bg-[#0a0a0a] text-white hover:text-red-600 px-3 py-1 rounded-lg border border-transparent hover:border-red-600 transition"
+                  className="flex items-center gap-x-1 bg-[#0a0a0a] text-white hover:text-red-600 px-2 sm:px-3 py-1 rounded-lg border border-transparent hover:border-red-600 transition flex-shrink-0"
+                  title="Delete"
                 >
-                  <TrashIcon /> Delete
+                  <TrashIcon className="h-4 w-4 xs:h-3 xs:w-3 md:h-5 md:w-5" />
+                  <span className="hidden sm:inline text-xs md:text-sm">
+                    Delete
+                  </span>
                 </button>
               </div>
             </li>
