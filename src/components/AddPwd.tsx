@@ -1,45 +1,42 @@
 // src/components/AddPwd.tsx
 import React, { useState } from "react";
-import { encryptPassword } from "../utils/crypto";
 
 interface AddPwdProps {
-  onAddPassword: (name: string, value: string) => void;
+  onAddCredential: (title: string, password: string) => void;
 }
 
-const AddPwd: React.FC<AddPwdProps> = ({ onAddPassword }) => {
-  const [newPasswordName, setNewPasswordName] = useState<string>("");
-  const [newPasswordValue, setNewPasswordValue] = useState<string>("");
+const AddPwd: React.FC<AddPwdProps> = ({ onAddCredential }) => {
+  const [title, setTitle] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
-  const handleAddPassword = () => {
-    if (!newPasswordName || !newPasswordValue) return;
-
-    onAddPassword(newPasswordName, newPasswordValue);
-
-    setNewPasswordName("");
-    setNewPasswordValue("");
+  const handleAdd = () => {
+    if (!title || !password) return;
+    onAddCredential(title, password);
+    setTitle("");
+    setPassword("");
   };
 
   return (
     <div className="flex flex-col gap-2">
       <input
         type="text"
-        placeholder="Service Name"
-        value={newPasswordName}
-        onChange={(e) => setNewPasswordName(e.target.value)}
-        className="p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 hover:border-blue-600 transition"
+        placeholder="Service Title (e.g., Instagram)"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 transition"
       />
       <input
         type="password"
         placeholder="Password"
-        value={newPasswordValue}
-        onChange={(e) => setNewPasswordValue(e.target.value)}
-        className="p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 hover:border-blue-600 transition"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 transition"
       />
       <button
-        onClick={handleAddPassword}
+        onClick={handleAdd}
         className="bg-[#0a0a0a] text-white hover:text-blue-600 px-4 py-2 rounded-lg border border-transparent hover:border-blue-600 transition"
       >
-        Add Password
+        Add Credential
       </button>
     </div>
   );

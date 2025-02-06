@@ -1,6 +1,5 @@
 // src/components/PasswordManager.tsx
 import React, { useState, useEffect } from "react";
-import { encryptPassword, decryptPassword } from "../utils/crypto";
 import AddPwd from "./AddPwd";
 import {
   ChevronLeftIcon,
@@ -11,47 +10,79 @@ import {
 } from "./icons/Icons";
 
 interface PasswordEntry {
-  id: string;
-  name: string;
-  password: string; // Encrypted password
+  id: number;
+  website: string;
+  title: string;
+  username: string;
+  password: string; // This is encrypted on the backend.
+  notes?: string;
 }
 
+// Use the Vite prefix for your environment variable.
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL as string;
+
 const PasswordManager: React.FC = () => {
-  const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
-  const [showAddPassword, setShowAddPassword] = useState<boolean>(false);
-  // This state tracks which password entries are visible (i.e. not masked)
+  const [credentials, setCredentials] = useState<PasswordEntry[]>([]);
+  const [showAddCredential, setShowAddCredential] = useState<boolean>(false);
   const [visiblePasswords, setVisiblePasswords] = useState<{
-    [key: string]: boolean;
+    [key: number]: boolean;
   }>({});
 
+  // Fetch credentials for user id = 1 from backend on mount.
   useEffect(() => {
-    const storedPasswords = localStorage.getItem("passwords");
-    if (storedPasswords) {
-      setPasswords(JSON.parse(storedPasswords));
-    }
+    fetch(`${BACKEND_URL}/credentials/user/1`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => setCredentials(data))
+      .catch((err) =>
+        console.error("Error fetching credentials for user 1:", err)
+      );
   }, []);
 
-  const handleAddPassword = (name: string, value: string) => {
-    const encryptedPassword = encryptPassword(value);
-    const newEntry: PasswordEntry = {
-      id: Date.now().toString(),
-      name,
-      password: encryptedPassword,
+  // Now we expect the add method to provide the title and password.
+  // Here we use a static website and username for demonstration purposes.
+  const handleAddCredential = (title: string, password: string) => {
+    const newCredential = {
+      title,
+      website: `https://www.${title}.com`, // you can later let the user input this as well
+      username: "user@example.com", // In a real app, this should be user-provided.
+      password,
+      userId: 1, // Adjust as necessary (e.g., current user's id)
     };
 
-    const updatedPasswords = [...passwords, newEntry];
-    setPasswords(updatedPasswords);
-    localStorage.setItem("passwords", JSON.stringify(updatedPasswords));
+    fetch(`${BACKEND_URL}/credentials`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newCredential),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((createdEntry) => {
+        setCredentials((prev) => [...prev, createdEntry]);
+      })
+      .catch((err) => console.error("Error adding credential:", err));
   };
 
-  const handleDeletePassword = (id: string) => {
-    const updatedPasswords = passwords.filter((entry) => entry.id !== id);
-    setPasswords(updatedPasswords);
-    localStorage.setItem("passwords", JSON.stringify(updatedPasswords));
+  const handleDeleteCredential = (id: number) => {
+    fetch(`${BACKEND_URL}/credentials/${id}`, { method: "DELETE" })
+      .then((res) => res.json())
+      .then(() => {
+        setCredentials((prev) => prev.filter((entry) => entry.id !== id));
+      })
+      .catch((err) => console.error("Error deleting credential:", err));
   };
 
-  // Toggle the visibility state for a given password entry.
-  const toggleVisibility = (id: string) => {
+  const toggleVisibility = (id: number) => {
     setVisiblePasswords((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
@@ -59,29 +90,27 @@ const PasswordManager: React.FC = () => {
     <div>
       <section className="w-md">
         <button
-          onClick={() => setShowAddPassword(!showAddPassword)}
+          onClick={() => setShowAddCredential(!showAddCredential)}
           className="flex flex-row items-center gap-2 mb-6 bg-[#0a0a0a] text-white hover:text-blue-600 rounded-lg border border-transparent hover:border-blue-600 transition"
         >
-          {showAddPassword ? <ChevronLeftIcon /> : <PlusIcon />} New
+          {showAddCredential ? <ChevronLeftIcon /> : <PlusIcon />} New
         </button>
 
-        {showAddPassword && <AddPwd onAddPassword={handleAddPassword} />}
+        {showAddCredential && <AddPwd onAddCredential={handleAddCredential} />}
       </section>
 
       <section className="w-xl p-6 rounded-lg justify-center align-center shadow-md">
-        <h3 className="text-xl font-bold mb-4">Your Passwords</h3>
+        <h3 className="text-xl font-bold mb-4">Your Credentials</h3>
         <ul className="list-none p-0">
-          {passwords.map((entry) => (
+          {credentials.map((entry) => (
             <li
               key={entry.id}
               className="flex justify-between items-center gap-2 py-2 border-b"
             >
               <div className="flex items-center gap-2">
-                <strong>{entry.name}:</strong>
+                <strong>{entry.title}:</strong>
                 <span>
-                  {visiblePasswords[entry.id]
-                    ? decryptPassword(entry.password)
-                    : "••••••••"}
+                  {visiblePasswords[entry.id] ? entry.password : "••••••••"}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -97,7 +126,7 @@ const PasswordManager: React.FC = () => {
                   {visiblePasswords[entry.id] ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
                 <button
-                  onClick={() => handleDeletePassword(entry.id)}
+                  onClick={() => handleDeleteCredential(entry.id)}
                   className="flex flex-row items-center gap-2 bg-[#0a0a0a] text-white hover:text-red-600 px-3 py-1 rounded-lg border border-transparent hover:border-red-600 transition"
                 >
                   <TrashIcon /> Delete
