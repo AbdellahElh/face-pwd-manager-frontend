@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { post } from "../data/apiClient";
 import Webcam from "./Webcam";
 
 const Register: React.FC = () => {
@@ -24,19 +25,13 @@ const Register: React.FC = () => {
     formData.append("password", password);
     formData.append("selfie", selfie, "selfie.jpg");
     try {
-      const res = await fetch("/api/users/register", {
-        method: "POST",
-        body: formData,
-      });
-      if (res.ok) {
-        setSuccess(true);
-        setError("");
-      } else {
-        const data = await res.json();
-        setError(data.message || "Registration failed");
-      }
-    } catch (err) {
-      setError("Registration failed");
+      // register user via API client
+      await post("/users/register", formData as any);
+      setSuccess(true);
+      setError("");
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Registration failed";
+      setError(message);
     }
   };
 
