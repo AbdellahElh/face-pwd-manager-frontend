@@ -1,8 +1,8 @@
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import FaceRecognition from "./FaceRecognition";
-import PasswordManager from "./PasswordManager";
-import Webcam from "./Webcam";
+import FaceRecognition from "../components/FaceRecognition";
+import PasswordManager from "../components/PasswordManager";
+import Webcam from "../components/Webcam";
 
 const Home: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);

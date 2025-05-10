@@ -1,9 +1,9 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, useRoutes } from "react-router-dom";
-import Home from "./components/Home";
-import Register from "./components/Register";
 import "./index.css";
+import Home from "./pages/Home";
+import Register from "./pages/Register";
 
 const routes = [
   { path: "/", element: <Home /> },

@@ -1,5 +1,5 @@
 import React from "react";
-import { EyeIcon, EyeOffIcon, TrashIcon } from "./icons/Icons";
+import { EyeIcon, EyeOffIcon, TrashIcon } from "../components/icons/Icons";
 
 export interface CredentialEntry {
   id: number;
@@ -26,7 +26,9 @@ const Credential: React.FC<CredentialProps> = ({
   return (
     <li className="flex items-center justify-between py-2 whitespace-nowrap">
       <div className="flex-1 flex items-center lg:w-md md:w-sm sm:w-xs xs:w-xxs gap-x-2 md:gap-x-4 overflow-hidden">
-        <strong className="text-sm md:text-base truncate">{entry.title}:</strong>
+        <strong className="text-sm md:text-base truncate">
+          {entry.title}:
+        </strong>
         <span className="text-xs md:text-sm truncate">
           {visible ? entry.password : "••••••••"}
         </span>
