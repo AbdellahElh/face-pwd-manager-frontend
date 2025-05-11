@@ -1,34 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import useSWR, { mutate } from "swr";
+import { fetchAll, post, remove } from "../data/apiClient";
+import { authService } from "../services/authService";
 import AddPwd from "./AddPwd";
+import { CredentialEntry } from "./Credential";
 import CredentialList from "./CredentialList";
 import { ChevronLeftIcon, PlusIcon } from "./icons/Icons";
-import { CredentialEntry } from "./Credential";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL as string;
 
 const PasswordManager: React.FC = () => {
-  const [credentials, setCredentials] = useState<CredentialEntry[]>([]);
   const [showAddCredential, setShowAddCredential] = useState<boolean>(false);
   const [visiblePasswords, setVisiblePasswords] = useState<{
     [key: number]: boolean;
   }>({});
 
-  // Fetch credentials for user id = 1 on mount.
-  useEffect(() => {
-    fetch(`${BACKEND_URL}/credentials/user/1`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => setCredentials(data))
-      .catch((err) =>
-        console.error("Error fetching credentials for user 1:", err)
-      );
-  }, []);
+  // Get current user
+  const user = authService.getCurrentUser();
+  const userId = user?.id || 1; // Fallback to user id 1 if not found
 
-  const handleAddCredential = (
+  // Fetch credentials with SWR
+  const { data: credentials = [], error } = useSWR<CredentialEntry[]>(
+    `/credentials/user/${userId}`,
+    fetchAll
+  );
+
+  const handleAddCredential = async (
     website: string,
     title: string,
     username: string,
@@ -39,35 +34,39 @@ const PasswordManager: React.FC = () => {
       title,
       username,
       password,
-      userId: 1, // Adjust as needed for the current user
+      userId,
     };
 
-    fetch(`${BACKEND_URL}/credentials`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newCredential),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((createdEntry) => {
-        setCredentials((prev) => [...prev, createdEntry]);
-      })
-      .catch((err) => console.error("Error adding credential:", err));
+    try {
+      const createdEntry = await post<typeof newCredential, CredentialEntry>(
+        "/credentials",
+        newCredential
+      );
+
+      // Update the SWR cache with the new credential
+      mutate(
+        `/credentials/user/${userId}`,
+        [...credentials, createdEntry],
+        false
+      );
+    } catch (err) {
+      console.error("Error adding credential:", err);
+    }
   };
 
-  const handleDeleteCredential = (id: number) => {
-    fetch(`${BACKEND_URL}/credentials/${id}`, { method: "DELETE" })
-      .then((res) => res.json())
-      .then(() => {
-        setCredentials((prev) => prev.filter((entry) => entry.id !== id));
-      })
-      .catch((err) => console.error("Error deleting credential:", err));
+  const handleDeleteCredential = async (id: number) => {
+    try {
+      await remove("/credentials", id);
+
+      // Update the SWR cache to remove the deleted credential
+      mutate(
+        `/credentials/user/${userId}`,
+        credentials.filter((entry) => entry.id !== id),
+        false
+      );
+    } catch (err) {
+      console.error("Error deleting credential:", err);
+    }
   };
 
   const toggleVisibility = (id: number) => {
@@ -76,6 +75,12 @@ const PasswordManager: React.FC = () => {
 
   return (
     <div>
+      {error && (
+        <div className="text-red-500 mb-4">
+          Error loading credentials. Please try again.
+        </div>
+      )}
+
       <section className="mb-6">
         <button
           onClick={() => setShowAddCredential(!showAddCredential)}
