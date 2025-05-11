@@ -1,25 +1,25 @@
 import React, { useState } from "react";
 import useSWR, { mutate } from "swr";
+import { useAuth } from "../context/AuthContext";
 import { fetchAll, post, remove } from "../data/apiClient";
-import { authService } from "../services/authService";
+import { CredentialEntry } from "../models/Credential";
 import AddPwd from "./AddCredential";
-import { CredentialEntry } from "./CredentialItem";
 import CredentialList from "./CredentialList";
 import { ChevronLeftIcon, PlusIcon } from "./icons/Icons";
 
 const PasswordManager: React.FC = () => {
+  const { user, isLoggedIn } = useAuth();
+
+  const userId = user?.id;
   const [showAddCredential, setShowAddCredential] = useState<boolean>(false);
   const [visiblePasswords, setVisiblePasswords] = useState<{
     [key: number]: boolean;
   }>({});
 
-  // Get current user
-  const user = authService.getCurrentUser();
-  const userId = user?.id || 1; // Fallback to user id 1 if not found
-
-  // Fetch credentials with SWR
+  // Only fetch once we have a valid userId
+  const swrKey = userId != null ? `/credentials/user/${userId}` : null;
   const { data: credentials = [], error } = useSWR<CredentialEntry[]>(
-    `/credentials/user/${userId}`,
+    swrKey,
     fetchAll
   );
 

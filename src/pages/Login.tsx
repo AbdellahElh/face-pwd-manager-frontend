@@ -113,7 +113,6 @@ const Login: React.FC = () => {
           videoRef={videoRef}
           onAuthenticated={handleAuthenticated}
           onError={handleError}
-          email={email}
         />
         <p className="text-gray-600 mt-4 text-center">
           Please position your face within the camera view to authenticate.

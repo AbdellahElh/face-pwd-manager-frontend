@@ -1,37 +1,28 @@
-import React, { useEffect, useState } from "react";
+// src/pages/Home.tsx (or wherever Home lives)
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PasswordManager from "../components/PasswordManager";
-import { authService } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 const Home: React.FC = () => {
-  const [user, setUser] = useState(authService.getCurrentUser());
-  const [error, setError] = useState<string | null>(null);
+  const { user, logout, isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    if (!isLoggedIn) {
       navigate("/login");
     }
-  }, [user, navigate]);
+  }, [isLoggedIn, navigate]);
 
-  const handleLogout = () => {
-    authService.logout();
-    navigate("/login");
-  };
+  if (!user) return null; // or a spinner
 
   return (
     <div className="flex flex-col items-center p-4">
-      {error && (
-        <p className="text-red-500 mb-4 text-sm sm:text-base text-center">
-          {error}
-        </p>
-      )}
-
       <div className="w-full max-w-4xl">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Welcome, {user?.email}</h2>
+          <h2 className="text-xl font-bold">Welcome, {user.email}</h2>
           <button
-            onClick={handleLogout}
+            onClick={() => logout()}
             className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
             Logout
