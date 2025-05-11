@@ -1,14 +1,6 @@
 import React from "react";
-import { EyeIcon, EyeOffIcon, TrashIcon } from "../components/icons/Icons";
-
-export interface CredentialEntry {
-  id: number;
-  website: string;
-  title: string;
-  username: string;
-  password: string;
-  notes?: string;
-}
+import { CredentialEntry } from "../models/Credential";
+import { EyeIcon, EyeOffIcon, TrashIcon } from "./icons/Icons";
 
 interface CredentialProps {
   entry: CredentialEntry;
@@ -17,7 +9,7 @@ interface CredentialProps {
   onDelete: (id: number) => void;
 }
 
-const Credential: React.FC<CredentialProps> = ({
+const CredentialItem: React.FC<CredentialProps> = ({
   entry,
   visible,
   onToggleVisibility,
@@ -58,4 +50,4 @@ const Credential: React.FC<CredentialProps> = ({
   );
 };
 
-export default Credential;
+export default CredentialItem;

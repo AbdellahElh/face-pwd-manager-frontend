@@ -3,7 +3,7 @@ import useSWR, { mutate } from "swr";
 import { fetchAll, post, remove } from "../data/apiClient";
 import { authService } from "../services/authService";
 import AddPwd from "./AddCredential";
-import { CredentialEntry } from "./Credential";
+import { CredentialEntry } from "./CredentialItem";
 import CredentialList from "./CredentialList";
 import { ChevronLeftIcon, PlusIcon } from "./icons/Icons";
 

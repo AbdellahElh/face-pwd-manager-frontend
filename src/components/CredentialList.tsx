@@ -1,5 +1,6 @@
 import React from "react";
-import Credential, { CredentialEntry } from "./Credential";
+import CredentialItem from "./CredentialItem";
+import { CredentialEntry } from "../models/Credential";
 
 interface CredentialListProps {
   credentials: CredentialEntry[];
@@ -17,7 +18,7 @@ const CredentialList: React.FC<CredentialListProps> = ({
   return (
     <ul className="divide-y divide-gray-200">
       {credentials.map((entry) => (
-        <Credential
+        <CredentialItem
           key={entry.id}
           entry={entry}
           visible={!!visiblePasswords[entry.id]}
