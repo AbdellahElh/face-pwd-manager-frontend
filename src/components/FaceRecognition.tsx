@@ -19,25 +19,25 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
   const [initialized, setInitialized] = useState<boolean>(false);
   const [attemptingAuth, setAttemptingAuth] = useState<boolean>(false);
 
-  // Load models once
+  // Load only the face detector model - we don't need landmarks or descriptors
+  // as face matching will be done on the backend
   useEffect(() => {
     const loadModels = async () => {
       const MODEL_URL = "/models";
       try {
-        console.log("Loading Face API models...");
+        console.log("Loading Face API model...");
         await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-        console.log("Face API models loaded");
+        console.log("Face API model loaded");
         setInitialized(true);
       } catch (error) {
         console.error("Error initializing Face API:", error);
-        onError("Failed to initialize face recognition.");
+        onError("Failed to initialize face detection.");
       }
     };
 
     loadModels();
   }, [onError]);
+
   const captureAndAuthenticate = useCallback(async () => {
     if (!videoRef.current || !initialized || !email || attemptingAuth) return;
 
@@ -45,13 +45,9 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
 
     try {
       const video = videoRef.current;
-      const displaySize = { width: video.width, height: video.height };
 
-      // Detect face in the video stream
-      const detection = await faceapi
-        .detectSingleFace(video)
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+      // Just detect if a face is present, no need for landmarks or descriptors
+      const detection = await faceapi.detectSingleFace(video);
 
       if (!detection) {
         console.log(
@@ -74,18 +70,19 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       // Convert canvas to blob
-      const blob = await new Promise<Blob>((resolve) => {
+      const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
           (blob) => {
-            resolve(blob!);
+            if (blob) resolve(blob);
+            else reject(new Error("Failed to create image blob"));
           },
           "image/jpeg",
           0.95
         );
       });
 
-      // Send to backend for authentication
       try {
+        // Send to backend for authentication
         const user = await authService.loginWithFace(email, blob);
         console.log("User authenticated:", user);
 
