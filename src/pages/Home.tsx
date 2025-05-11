@@ -1,21 +1,22 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import FaceRecognition from "../components/FaceRecognition";
 import PasswordManager from "../components/PasswordManager";
-import Webcam from "../components/Webcam";
+import { authService } from "../services/authService";
 
 const Home: React.FC = () => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState(authService.getCurrentUser());
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleAuthenticated = () => {
-    setIsAuthenticated(true);
-  };
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
-  const handleError = (errorMessage: string) => {
-    setError(errorMessage);
+  const handleLogout = () => {
+    authService.logout();
+    navigate("/login");
   };
 
   return (
@@ -25,31 +26,20 @@ const Home: React.FC = () => {
           {error}
         </p>
       )}
-      {!isAuthenticated ? (
-        <div className="flex flex-col items-center space-y-4 sm:space-y-6">
-          <Webcam
-            videoRef={videoRef}
-            onStreamStart={() => {}}
-            onStreamError={handleError}
-          />
-          <FaceRecognition
-            videoRef={videoRef}
-            onAuthenticated={handleAuthenticated}
-            onError={handleError}
-          />
-          <p className="text-gray-200 mt-4 text-xs sm:text-sm md:text-base text-center">
-            Please position your face within the camera view to authenticate.
-          </p>
+
+      <div className="w-full max-w-4xl">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold">Welcome, {user?.email}</h2>
           <button
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
-            onClick={() => navigate("/register")}
+            onClick={handleLogout}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
-            Register
+            Logout
           </button>
         </div>
-      ) : (
+
         <PasswordManager />
-      )}
+      </div>
     </div>
   );
 };

@@ -7,12 +7,12 @@ export const axios = axiosRoot.create({
   baseURL: baseUrl,
 });
 
-// Function to set auth token if you implement authentication later
+// Function to set auth token for authentication
 export const setAuthToken = (token: string | null) => {
   if (token) {
-    axios.defaults.headers["Authorization"] = `Bearer ${token}`;
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {
-    delete axios.defaults.headers["Authorization"];
+    delete axios.defaults.headers.common["Authorization"];
   }
 };
 
