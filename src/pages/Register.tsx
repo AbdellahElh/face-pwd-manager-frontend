@@ -6,7 +6,6 @@ import { authService } from "../services/authService";
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [selfie, setSelfie] = useState<Blob | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,12 +26,11 @@ const Register: React.FC = () => {
 
     const formData = new FormData();
     formData.append("email", email);
-    formData.append("password", password);
     formData.append("selfie", selfie, "selfie.jpg");
 
     try {
       // register user via API client
-      const response = await post("/users/register", formData as any);
+      await post("/users/register", formData as any);
 
       // After registration, log the user in automatically
       try {
@@ -51,6 +49,7 @@ const Register: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto p-4">
+      {" "}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label>Email:</label>
@@ -58,16 +57,6 @@ const Register: React.FC = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="border p-2 w-full"
-            required
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             className="border p-2 w-full"
             required
           />
