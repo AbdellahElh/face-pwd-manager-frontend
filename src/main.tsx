@@ -1,13 +1,31 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, useRoutes } from "react-router-dom";
+import { BrowserRouter, Navigate, useRoutes } from "react-router-dom";
 import "./index.css";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
 import Register from "./pages/Register";
+import { authService } from "./services/authService";
+
+// Protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  if (!authService.isLoggedIn()) {
+    return <Navigate to="/login" />;
+  }
+  return <>{children}</>;
+};
 
 const routes = [
-  { path: "/", element: <Home /> },
+  {
+    path: "/",
+    element: (
+      <ProtectedRoute>
+        <Home />
+      </ProtectedRoute>
+    ),
+  },
   { path: "/register", element: <Register /> },
+  { path: "/login", element: <Login /> },
 ];
 
 const Root: React.FC = () => {
