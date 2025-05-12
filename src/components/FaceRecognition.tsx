@@ -6,15 +6,16 @@ interface FaceRecognitionProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   onAuthenticated: () => void;
   onError: (error: string) => void;
+  email: string;
 }
 
 const FaceRecognition: React.FC<FaceRecognitionProps> = ({
   videoRef,
   onAuthenticated,
   onError,
+  email,
 }) => {
-  const { user, login } = useAuth();
-  const email = user?.email;
+  const { login } = useAuth();
   const [initialized, setInitialized] = useState<boolean>(false);
   const [attemptingAuth, setAttemptingAuth] = useState<boolean>(false);
 
