@@ -2,7 +2,7 @@
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  line-height: 1lh;
   font-weight: 400;
 
   color-scheme: light dark;
@@ -26,7 +26,7 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
+  /* display: flex; */
   justify-content: center;
 }
 
