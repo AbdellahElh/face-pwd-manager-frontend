@@ -65,8 +65,8 @@ const Login: React.FC = () => {
   };
   if (isEmailStep) {
     return (
-      <div className="max-w-md mt-12 mx-auto p-6 rounded-2xl bg-[#242424] shadow-[0_0_15px_rgba(0,191,255,0.3)] hover:shadow-[0_0_20px_rgba(0,191,255,0.4)] transition-shadow">
-        <h2 className="text-2xl font-bold mb-6 text-center text-cyan-400">
+      <div className="max-w-md mt-12 mx-auto p-6 rounded-2xl bg-[var(--color-bg-primary)] shadow-[0_0_15px_var(--color-shadow-accent)] hover:shadow-[0_0_20px_var(--color-shadow-accent-hover)] transition-shadow">
+        <h2 className="text-2xl font-bold mb-6 text-center text-[var(--color-text-accent)]">
           Login to Password Manager
         </h2>
         <form onSubmit={handleEmailSubmit} className="space-y-5">
@@ -74,7 +74,7 @@ const Login: React.FC = () => {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium mb-1 text-gray-300"
+              className="block text-sm font-medium mb-1 text-[var(--color-text-secondary)]"
             >
               Email Address
             </label>
@@ -83,20 +83,20 @@ const Login: React.FC = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all"
+              className="w-full p-2.5 border border-[var(--color-border-secondary)] rounded-lg focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all"
               placeholder="Enter your email"
               required
             />
-          </div>
+          </div>{" "}
           {error && (
-            <div className="text-red-600 bg-red-50 p-2 rounded-lg text-sm">
+            <div className="text-[var(--color-text-error)] bg-[var(--color-bg-error)] p-2 rounded-lg text-sm">
               {error}
             </div>
           )}
           <div className="flex justify-between gap-4 pt-2">
             <button
               type="submit"
-              className="group relative inline-flex items-center justify-center px-6 py-2.5 font-medium rounded-[14px] bg-[#001e29] text-white border border-cyan-500 shadow-[0_0_10px_1px_rgba(0,191,255,0.4)] hover:shadow-[0_0_15px_3px_rgba(0,191,255,0.6)] transition-all duration-300 flex-1"
+              className="group relative inline-flex items-center justify-center px-6 py-2.5 font-medium rounded-[14px] bg-[var(--color-bg-button)] text-white border border-[var(--color-border-accent)] shadow-[0_0_10px_1px_var(--color-shadow-button)] hover:shadow-[0_0_15px_3px_var(--color-shadow-button-hover)] transition-all duration-300 flex-1"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-cyan-700/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[14px]"></span>
               <span className="relative z-10 font-semibold tracking-wide">
@@ -115,10 +115,9 @@ const Login: React.FC = () => {
       </div>
     );
   }
-
   return (
-    <div className="max-w-md mx-auto p-6 rounded-2xl bg-[#242424] shadow-[0_0_15px_rgba(0,191,255,0.3)] hover:shadow-[0_0_20px_rgba(0,191,255,0.4)] transition-shadow">
-      <h2 className="text-2xl font-bold mb-6 text-center text-cyan-400">
+    <div className="max-w-md mx-auto p-6 rounded-2xl bg-[var(--color-bg-primary)] shadow-[0_0_15px_var(--color-shadow-accent)] hover:shadow-[0_0_20px_var(--color-shadow-accent-hover)] transition-shadow">
+      <h2 className="text-2xl font-bold mb-6 text-center text-[var(--color-text-accent)]">
         Face Recognition
       </h2>
       <div className="flex flex-col items-center space-y-5">
@@ -133,14 +132,14 @@ const Login: React.FC = () => {
           onError={handleError}
           email={email}
         />
-        <p className="text-gray-300 mt-1 text-center text-sm">
+        <p className="text-[var(--color-text-secondary)] mt-1 text-center text-sm">
           Please position your face within the camera view to authenticate.
         </p>
         {error && (
-          <div className="text-red-600 bg-red-50 p-2 rounded-lg text-sm w-full">
+          <div className="text-[var(--color-text-error)] bg-[var(--color-bg-error)] p-2 rounded-lg text-sm w-full">
             {error}
           </div>
-        )}
+        )}{" "}
         <button
           onClick={resetLogin}
           className="mt-2 px-6 py-2.5 rounded-[14px] bg-gray-50 text-gray-800 border border-gray-300 hover:bg-gray-100 transition-colors duration-300 w-full font-medium"
