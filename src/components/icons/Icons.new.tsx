@@ -3,6 +3,7 @@ import React from "react";
 import { IconContext } from "react-icons";
 import {
   HiChevronLeft,
+  HiClipboardCopy,
   HiDotsVertical,
   HiExternalLink,
   HiEye,
@@ -10,13 +11,15 @@ import {
   HiLogout,
   HiPlus,
   HiTrash,
-  HiUser
+  HiUser,
 } from "react-icons/hi";
-import { MdOutlineContentCopy } from "react-icons/md";
 
 // Helper function to wrap icon components with IconContext
 const withIconContext = (IconComponent: React.ComponentType<any>) => {
-  return ({ className, ...props }: { className?: string } & Record<string, any>) => (
+  return ({
+    className,
+    ...props
+  }: { className?: string } & Record<string, any>) => (
     <IconContext.Provider value={{ className: `${className || "h-5 w-5"}` }}>
       <IconComponent {...props} />
     </IconContext.Provider>
@@ -29,7 +32,7 @@ export const TrashIcon = withIconContext(HiTrash);
 export const EyeIcon = withIconContext(HiEye);
 export const EyeOffIcon = withIconContext(HiEyeOff);
 export const LogoutIcon = withIconContext(HiLogout);
-export const ClipboardIcon = withIconContext(MdOutlineContentCopy);
+export const ClipboardIcon = withIconContext(HiClipboardCopy);
 export const ExternalLinkIcon = withIconContext(HiExternalLink);
 export const DotsVerticalIcon = withIconContext(HiDotsVertical);
 export const UserIcon = withIconContext(HiUser);

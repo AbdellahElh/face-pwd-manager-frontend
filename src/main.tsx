@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { Toaster } from "react-hot-toast";
 import { BrowserRouter, Navigate, useRoutes } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -32,6 +33,7 @@ const Root = () => (
   <AuthProvider>
     <BrowserRouter>
       <AppRoutes />
+      <Toaster />
     </BrowserRouter>
   </AuthProvider>
 );
