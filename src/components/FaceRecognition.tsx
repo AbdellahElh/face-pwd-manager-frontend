@@ -1,13 +1,12 @@
-// src/components/FaceRecognition.tsx
 import * as faceapi from "face-api.js";
 import React, { useCallback, useEffect, useState } from "react";
-import { authService } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 interface FaceRecognitionProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   onAuthenticated: () => void;
   onError: (error: string) => void;
-  email?: string;
+  email: string;
 }
 
 const FaceRecognition: React.FC<FaceRecognitionProps> = ({
@@ -16,43 +15,35 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
   onError,
   email,
 }) => {
+  const { login } = useAuth();
   const [initialized, setInitialized] = useState<boolean>(false);
   const [attemptingAuth, setAttemptingAuth] = useState<boolean>(false);
 
-  // Load models once
+  // Load only the face detector model - we don't need landmarks or descriptors
+  // as face matching will be done on the backend
   useEffect(() => {
     const loadModels = async () => {
       const MODEL_URL = "/models";
       try {
-        console.log("Loading Face API models...");
+        console.log("Loading Face API model...");
         await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-        console.log("Face API models loaded");
+        console.log("Face API model loaded");
         setInitialized(true);
       } catch (error) {
         console.error("Error initializing Face API:", error);
-        onError("Failed to initialize face recognition.");
+        onError("Failed to initialize face detection.");
       }
     };
 
     loadModels();
   }, [onError]);
+
   const captureAndAuthenticate = useCallback(async () => {
     if (!videoRef.current || !initialized || !email || attemptingAuth) return;
-
     setAttemptingAuth(true);
-
     try {
       const video = videoRef.current;
-      const displaySize = { width: video.width, height: video.height };
-
-      // Detect face in the video stream
-      const detection = await faceapi
-        .detectSingleFace(video)
-        .withFaceLandmarks()
-        .withFaceDescriptor();
-
+      const detection = await faceapi.detectSingleFace(video);
       if (!detection) {
         console.log(
           "No face detected. Please position yourself in the camera view."
@@ -74,40 +65,35 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       // Convert canvas to blob
-      const blob = await new Promise<Blob>((resolve) => {
+      const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
           (blob) => {
-            resolve(blob!);
+            if (blob) resolve(blob);
+            else reject(new Error("Failed to create image blob"));
           },
           "image/jpeg",
           0.95
         );
       });
 
-      // Send to backend for authentication
-      try {
-        const user = await authService.loginWithFace(email, blob);
-        console.log("User authenticated:", user);
-
-        // Stop the video stream after authentication
-        const stream = video.srcObject as MediaStream;
-        stream.getTracks().forEach((track) => track.stop());
-
-        onAuthenticated();
-      } catch (error: any) {
-        console.error("Authentication failed:", error);
-        onError(
-          error.response?.data?.message ||
-            "Authentication failed. Please try again."
-        );
-        setAttemptingAuth(false);
-      }
-    } catch (error: any) {
-      console.error("Error during face capture:", error);
-      onError("Failed to process your face. Please try again.");
+      await login(email, blob);
+      const stream = video.srcObject as MediaStream;
+      stream.getTracks().forEach((t) => t.stop());
+      onAuthenticated();
+    } catch (err: any) {
+      console.error("Auth error:", err);
+      onError(err.message || "Authentication failed. Please try again.");
       setAttemptingAuth(false);
     }
-  }, [initialized, videoRef, email, onAuthenticated, onError, attemptingAuth]);
+  }, [
+    initialized,
+    videoRef,
+    email,
+    login,
+    onAuthenticated,
+    onError,
+    attemptingAuth,
+  ]);
 
   const handlePlay = useCallback(() => {
     if (!videoRef.current || !initialized || !email) return;
@@ -119,7 +105,7 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
       }
 
       captureAndAuthenticate();
-    }, 1500); // Check every 1.5 seconds
+    }, 1000); // Check every 1 second
 
     return () => clearInterval(interval);
   }, [videoRef, initialized, email, captureAndAuthenticate]);
@@ -128,7 +114,6 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
     if (!initialized || !videoRef.current) return;
 
     const video = videoRef.current;
-
     if (video.readyState >= 2 && !video.paused && !video.ended) {
       // Video is already playing
       const cleanup = handlePlay();
