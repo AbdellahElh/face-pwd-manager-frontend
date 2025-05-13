@@ -24,7 +24,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           setAuthToken(u.token);
         }
         return u;
-      } catch {
+      } catch (error) {
+        console.error("Failed to parse user from localStorage:", error);
+        localStorage.removeItem("user");
         return null;
       }
     }

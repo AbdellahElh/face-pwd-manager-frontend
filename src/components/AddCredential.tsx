@@ -1,7 +1,7 @@
 // src/components/AddPwd.tsx
 import React, { useState } from "react";
 import generateStrongPassword from "./GeneratePwd";
-import { PlusIcon, EyeIcon, EyeOffIcon } from "./icons/Icons";
+import { EyeIcon, EyeOffIcon, PlusIcon } from "./icons/Icons";
 
 interface AddPwdProps {
   onAddCredential: (
@@ -22,6 +22,10 @@ const AddPwd: React.FC<AddPwdProps> = ({ onAddCredential }) => {
   const handleAdd = () => {
     if (!website || !username || !password) return;
     onAddCredential(website, title, username, password);
+    resetForm();
+  };
+
+  const resetForm = () => {
     setWebsite("");
     setTitle("");
     setUsername("");
@@ -38,55 +42,99 @@ const AddPwd: React.FC<AddPwdProps> = ({ onAddCredential }) => {
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <h3 className="text-xl md:text-2xl font-bold my-4">New Credential</h3>
-      <input
-        type="text"
-        placeholder="Website URI (e.g., www.instagram.com)"
-        value={website}
-        onChange={(e) => setWebsite(e.target.value)}
-        className="p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 transition"
-      />
-      <input
-        type="text"
-        placeholder="Username or email (e.g., user@service.com)"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        className="p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 transition"
-      />
-      <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:border-blue-600 transition">
-        <input
-          type={passwordVisible ? "text" : "password"}
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="p-2 flex-grow outline-none"
-        />
-        <div className="flex pr-3">
-          <button
-            onClick={toggleVisibility}
-            title={passwordVisible ? "Hide password" : "Show password"}
-          >
-            {passwordVisible ? (
-              <EyeOffIcon className="h-5 w-5 text-gray-600 hover:text-blue-600" />
-            ) : (
-              <EyeIcon className="h-5 w-5 text-gray-600 hover:text-blue-600" />
-            )}
-          </button>
-          <button
-            onClick={handleGeneratePassword}
-            title="Generate strong password"
-          >
-            <PlusIcon className="h-5 w-5 text-gray-600 hover:text-blue-600" />
-          </button>
+    <div className="flex flex-col gap-4">
+      <h3 className="text-xl font-bold mb-2 text-center">Add New Credential</h3>
+
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="website" className="block text-sm font-medium mb-1">
+            Website URL
+          </label>
+          <input
+            id="website"
+            type="text"
+            placeholder="e.g., www.instagram.com"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 transition"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="title" className="block text-sm font-medium mb-1">
+            Title (Optional)
+          </label>
+          <input
+            id="title"
+            type="text"
+            placeholder="e.g., Instagram Account"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 transition"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="username" className="block text-sm font-medium mb-1">
+            Username/Email
+          </label>
+          <input
+            id="username"
+            type="text"
+            placeholder="e.g., user@service.com"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 transition"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium mb-1">
+            Password
+          </label>
+          <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:border-blue-600 transition">
+            <input
+              id="password"
+              type={passwordVisible ? "text" : "password"}
+              placeholder="Enter or generate password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="p-2 flex-grow outline-none"
+            />
+            <div className="flex pr-3">
+              <button
+                onClick={toggleVisibility}
+                title={passwordVisible ? "Hide password" : "Show password"}
+                className="p-1"
+                type="button"
+              >
+                {passwordVisible ? (
+                  <EyeOffIcon className="h-5 w-5 text-gray-600 hover:text-blue-600" />
+                ) : (
+                  <EyeIcon className="h-5 w-5 text-gray-600 hover:text-blue-600" />
+                )}
+              </button>
+              <button
+                onClick={handleGeneratePassword}
+                title="Generate strong password"
+                className="p-1"
+                type="button"
+              >
+                <PlusIcon className="h-5 w-5 text-gray-600 hover:text-blue-600" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      <button
-        onClick={handleAdd}
-        className="bg-[#0a0a0a] text-white hover:text-blue-600 px-4 py-2 my-4 rounded-lg border border-transparent hover:border-blue-600 transition"
-      >
-        Add Credential
-      </button>
+
+      <div className="flex justify-end gap-2 mt-4">
+        <button
+          onClick={handleAdd}
+          className="bg-[#0a0a0a] text-white hover:text-blue-600 px-4 py-2 rounded-lg border border-transparent hover:border-blue-600 transition"
+        >
+          Save Credential
+        </button>
+      </div>
     </div>
   );
 };
