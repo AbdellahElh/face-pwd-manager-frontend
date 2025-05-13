@@ -1,9 +1,9 @@
-// src/components/AddPwd.tsx
+// src/components/AddCredential.tsx
 import React, { useState } from "react";
 import generateStrongPassword from "./GeneratePwd";
 import { EyeIcon, EyeOffIcon, PlusIcon } from "./icons/Icons";
 
-interface AddPwdProps {
+interface AddCredentialProps {
   onAddCredential: (
     website: string,
     title: string,
@@ -12,7 +12,7 @@ interface AddPwdProps {
   ) => void;
 }
 
-const AddPwd: React.FC<AddPwdProps> = ({ onAddCredential }) => {
+const AddCredential: React.FC<AddCredentialProps> = ({ onAddCredential }) => {
   const [website, setWebsite] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [username, setUsername] = useState<string>("");
@@ -139,4 +139,4 @@ const AddPwd: React.FC<AddPwdProps> = ({ onAddCredential }) => {
   );
 };
 
-export default AddPwd;
+export default AddCredential;
