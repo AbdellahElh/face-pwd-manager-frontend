@@ -12,7 +12,7 @@ import { getUserEncryptionKey } from "../utils/cryptoUtils";
 
 interface AuthContextValue {
   user: User | null;
-  login: (email: string, selfie?: Blob) => Promise<void>;
+  login: (email: string, formData?: FormData) => Promise<void>;
   logout: () => void;
   isLoggedIn: boolean;
   encryptionKey: string | null;
@@ -49,15 +49,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     return getUserEncryptionKey(user.id, user.email);
   }, [user]);
 
-  const login = async (email: string, selfie?: Blob) => {
-    const formData = new FormData();
-    formData.append("email", email);
-    if (selfie) {
-      formData.append("selfie", selfie, "selfie.jpg");
+  const login = async (email: string, formData?: FormData) => {
+    // If encrypted form data wasn't provided, create a basic one with just the email
+    let dataToSend = formData;
+    if (!dataToSend) {
+      dataToSend = new FormData();
+      dataToSend.append("email", email);
     }
+
     const response = await post<FormData, LoginResponse>(
       "/users/login",
-      formData
+      dataToSend
     );
     const loggedInUser: User = {
       id: response.user.id,

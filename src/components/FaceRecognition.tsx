@@ -1,6 +1,8 @@
 import * as faceapi from "face-api.js";
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { getUserEncryptionKey } from "../utils/cryptoUtils";
+import { createEncryptedImageFormData } from "../utils/imageEncryptionUtils";
 
 interface FaceRecognitionProps {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -59,12 +61,8 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
       const ctx = canvas.getContext("2d");
       if (!ctx) {
         throw new Error("Could not create canvas context");
-      }
-
-      // Draw the video frame to the canvas
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // Convert canvas to blob
+      } // Draw the video frame to the canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height); // Convert canvas to blob
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
           (blob) => {
@@ -76,7 +74,20 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
         );
       });
 
-      await login(email, blob);
+      // Generate a temporary encryption key based on email (we don't have the user ID yet)
+      const tempEncryptionKey = getUserEncryptionKey(0, email);
+
+      // Create form data with the encrypted selfie using helper function
+      const formData = await createEncryptedImageFormData(
+        blob,
+        tempEncryptionKey,
+        "selfie",
+        { email }
+      );
+
+      // Login with the form data containing encrypted selfie
+      await login(email, formData);
+
       const stream = video.srcObject as MediaStream;
       stream.getTracks().forEach((t) => t.stop());
       onAuthenticated();

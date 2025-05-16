@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Webcam from "../components/Webcam";
 import { useAuth } from "../context/AuthContext";
 import { post } from "../data/apiClient";
+import { getUserEncryptionKey } from "../utils/cryptoUtils";
+import { createEncryptedImageFormData } from "../utils/imageEncryptionUtils";
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -14,7 +16,6 @@ const Register: React.FC = () => {
   const { login } = useAuth();
 
   const handleCapture = (blob: Blob) => setSelfie(blob);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selfie) {
@@ -22,12 +23,32 @@ const Register: React.FC = () => {
       return;
     }
     setIsLoading(true);
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("selfie", selfie, "selfie.jpg");
+
     try {
+      // Generate a temporary encryption key based on email (we don't have the user ID yet)
+      const tempEncryptionKey = getUserEncryptionKey(0, email);
+
+      // Create encrypted form data for registration
+      const formData = await createEncryptedImageFormData(
+        selfie,
+        tempEncryptionKey,
+        "selfie",
+        { email }
+      );
+
+      // Register the user with encrypted face image
       await post("/users/register", formData as any);
-      await login(email, selfie);
+
+      // Create login form data - reuse same encrypted image data
+      const loginFormData = await createEncryptedImageFormData(
+        selfie,
+        tempEncryptionKey,
+        "selfie",
+        { email }
+      );
+
+      // Log in after registration
+      await login(email, loginFormData);
       navigate("/");
     } catch (err: any) {
       console.error("Register error:", err);
