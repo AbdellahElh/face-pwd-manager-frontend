@@ -52,14 +52,19 @@ const Webcam: React.FC<WebcamProps> = ({
       }, "image/jpeg");
     }
   };
-
   return (
     <div className="flex flex-col justify-center items-center">
-      <video ref={ref} autoPlay muted className="w-[720px] h-[560px]" />
+      {" "}
+      <video
+        ref={ref}
+        autoPlay
+        muted
+        className="w-full max-h-[400px] object-cover rounded-lg border border-[var(--color-border-primary)]"
+      />
       {onCapture && (
         <button
           type="button"
-          className="mt-2 bg-blue-600 text-white px-4 py-2 rounded"
+          className="mt-3 px-6 py-2 rounded-[14px] bg-[var(--color-bg-button)] text-white border border-[var(--color-border-accent)] shadow-[0_0_10px_1px_var(--color-shadow-button)] hover:shadow-[0_0_15px_3px_var(--color-shadow-button-hover)] transition-all duration-300 font-medium"
           onClick={handleCapture}
         >
           Capture
