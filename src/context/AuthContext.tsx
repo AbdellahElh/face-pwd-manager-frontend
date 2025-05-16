@@ -1,13 +1,21 @@
 // src/context/AuthContext.tsx
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { post, setAuthToken } from "../data/apiClient";
 import { LoginResponse, User } from "../models/User";
+import { getUserEncryptionKey } from "../utils/cryptoUtils";
 
 interface AuthContextValue {
   user: User | null;
   login: (email: string, selfie?: Blob) => Promise<void>;
   logout: () => void;
   isLoggedIn: boolean;
+  encryptionKey: string | null;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -34,6 +42,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   });
 
   const isLoggedIn = !!user;
+
+  // Generate encryption key when user is available
+  const encryptionKey = useMemo(() => {
+    if (!user) return null;
+    return getUserEncryptionKey(user.id, user.email);
+  }, [user]);
 
   const login = async (email: string, selfie?: Blob) => {
     const formData = new FormData();
@@ -63,7 +77,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoggedIn }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isLoggedIn, encryptionKey }}
+    >
       {children}
     </AuthContext.Provider>
   );

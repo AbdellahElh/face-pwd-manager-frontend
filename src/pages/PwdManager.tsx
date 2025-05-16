@@ -5,12 +5,17 @@ import CredentialDetailModal from "../components/CredentialDetailModal";
 import CredentialList from "../components/CredentialList";
 import Modal from "../components/Modal";
 import { useAuth } from "../context/AuthContext";
-import { fetchAll, post, put, remove } from "../data/apiClient";
 import { CredentialEntry } from "../models/Credential";
+import {
+  createCredential,
+  deleteCredential,
+  fetchCredentials,
+  updateCredential,
+} from "../services/credentialService";
 import { showErrorToast, showSuccessToast } from "../utils/toastUtils";
 
 const PasswordManager: React.FC = () => {
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, encryptionKey } = useAuth();
 
   const userId = user?.id;
   const [showAddCredentialModal, setShowAddCredentialModal] =
@@ -21,30 +26,43 @@ const PasswordManager: React.FC = () => {
     [key: number]: boolean;
   }>({});
 
+  // Custom fetcher function that uses our credential service
+  const credentialFetcher = async (url: string) => {
+    const id = Number(userId);
+    if (isNaN(id) || !encryptionKey) return [];
+    return await fetchCredentials(id, encryptionKey);
+  };
+
   // Only fetch once we have a valid userId
   const swrKey = userId != null ? `/credentials/user/${userId}` : null;
   const { data: credentials = [], error } = useSWR<CredentialEntry[]>(
     swrKey,
-    fetchAll
+    credentialFetcher
   );
+
   const handleAddCredential = async (
     website: string,
     title: string,
     username: string,
     password: string
   ) => {
-    const newCredential = {
-      website,
-      title,
-      username,
-      password,
-      userId,
-    };
+    if (!userId || !encryptionKey) {
+      showErrorToast("Authentication error. Please log in again.");
+      return;
+    }
 
     try {
-      const createdEntry = await post<typeof newCredential, CredentialEntry>(
-        "/credentials",
-        newCredential
+      const newCredential = {
+        website,
+        title,
+        username,
+        password,
+      };
+
+      const createdEntry = await createCredential(
+        newCredential,
+        userId,
+        encryptionKey
       );
 
       // Update the SWR cache with the new credential
@@ -64,6 +82,11 @@ const PasswordManager: React.FC = () => {
   };
 
   const handleUpdateCredential = async (updatedCredential: CredentialEntry) => {
+    if (!encryptionKey) {
+      showErrorToast("Authentication error. Please log in again.");
+      return;
+    }
+
     try {
       // Make sure userId is included in the update
       const credentialToUpdate = {
@@ -71,10 +94,7 @@ const PasswordManager: React.FC = () => {
         userId,
       };
 
-      const updated = await put<typeof credentialToUpdate, CredentialEntry>(
-        "/credentials",
-        credentialToUpdate
-      );
+      const updated = await updateCredential(credentialToUpdate, encryptionKey);
 
       // Update the SWR cache with the updated credential
       mutate(
@@ -87,9 +107,10 @@ const PasswordManager: React.FC = () => {
       throw err;
     }
   };
+
   const handleDeleteCredential = async (id: number) => {
     try {
-      await remove("/credentials", id);
+      await deleteCredential(id);
 
       // Update the SWR cache to remove the deleted credential
       mutate(
@@ -104,6 +125,7 @@ const PasswordManager: React.FC = () => {
       showErrorToast("Failed to delete credential");
     }
   };
+
   const toggleVisibility = (id: number) => {
     const newVisibility = !visiblePasswords[id];
     setVisiblePasswords((prev) => ({ ...prev, [id]: newVisibility }));
