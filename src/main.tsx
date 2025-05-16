@@ -8,6 +8,10 @@ import "./index.css";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import { enforceHttps } from "./utils/securityUtils";
+
+// Enforce HTTPS in production environments
+enforceHttps();
 
 const AppRoutes = () =>
   useRoutes([

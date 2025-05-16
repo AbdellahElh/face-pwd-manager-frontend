@@ -4,12 +4,15 @@ import { CredentialEntry } from "../models/Credential";
 import { decrypt, encrypt } from "../utils/cryptoUtils";
 
 // Interface for encrypted credential
-interface EncryptedCredential extends Omit<CredentialEntry, "password"> {
+interface EncryptedCredential
+  extends Omit<CredentialEntry, "password" | "username" | "notes"> {
   password: string; // Encrypted password
+  username: string; // Encrypted username
+  notes?: string; // Encrypted notes
 }
 
 /**
- * Process a single credential by encrypting the password
+ * Process a single credential by encrypting sensitive fields
  */
 const encryptCredential = (
   credential: CredentialEntry,
@@ -17,12 +20,16 @@ const encryptCredential = (
 ): EncryptedCredential => {
   return {
     ...credential,
+    username: encrypt(credential.username, encryptionKey),
     password: encrypt(credential.password, encryptionKey),
+    notes: credential.notes
+      ? encrypt(credential.notes, encryptionKey)
+      : undefined,
   };
 };
 
 /**
- * Process a single credential by decrypting the password
+ * Process a single credential by decrypting sensitive fields
  */
 const decryptCredential = (
   credential: EncryptedCredential,
@@ -30,7 +37,11 @@ const decryptCredential = (
 ): CredentialEntry => {
   return {
     ...credential,
+    username: decrypt(credential.username, encryptionKey),
     password: decrypt(credential.password, encryptionKey),
+    notes: credential.notes
+      ? decrypt(credential.notes, encryptionKey)
+      : undefined,
   };
 };
 

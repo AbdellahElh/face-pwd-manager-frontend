@@ -1,6 +1,7 @@
 // src/components/AddCredential.tsx
 import React, { useState } from "react";
 import generateStrongPassword from "./GeneratePwd";
+import PasswordStrengthMeter from "./PasswordStrengthMeter";
 import { EyeIcon, EyeOffIcon, PlusIcon } from "./icons/Icons";
 
 interface AddCredentialProps {
@@ -100,7 +101,7 @@ const AddCredential: React.FC<AddCredentialProps> = ({ onAddCredential }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="p-2 flex-grow outline-none"
-            />
+            />{" "}
             <div className="flex pr-3">
               <button
                 onClick={toggleVisibility}
@@ -124,6 +125,7 @@ const AddCredential: React.FC<AddCredentialProps> = ({ onAddCredential }) => {
               </button>
             </div>
           </div>
+          {password && <PasswordStrengthMeter password={password} />}
         </div>
       </div>
 

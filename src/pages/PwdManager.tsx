@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
 import AddPwd from "../components/AddCredential";
+import BackupRestore from "../components/BackupRestore";
 import CredentialDetailModal from "../components/CredentialDetailModal";
 import CredentialList from "../components/CredentialList";
 import Modal from "../components/Modal";
@@ -12,10 +13,25 @@ import {
   fetchCredentials,
   updateCredential,
 } from "../services/credentialService";
+import { isSecureConnection } from "../utils/securityUtils";
 import { showErrorToast, showSuccessToast } from "../utils/toastUtils";
 
 const PasswordManager: React.FC = () => {
   const { user, isLoggedIn, encryptionKey } = useAuth();
+  const [isSecure, setIsSecure] = useState<boolean>(true);
+
+  // Check for secure connection when component mounts
+  useEffect(() => {
+    const secure = isSecureConnection();
+    setIsSecure(secure);
+
+    if (!secure) {
+      showErrorToast(
+        "Warning: Your connection is not secure. Password data may be at risk.",
+        { duration: 6000 }
+      );
+    }
+  }, []);
 
   const userId = user?.id;
   const [showAddCredentialModal, setShowAddCredentialModal] =
@@ -135,7 +151,6 @@ const PasswordManager: React.FC = () => {
   const handleCredentialClick = (credential: CredentialEntry) => {
     setSelectedCredential(credential);
   };
-
   return (
     <div>
       {error && (
@@ -143,7 +158,14 @@ const PasswordManager: React.FC = () => {
           Error loading credentials. Please try again.
         </div>
       )}
-
+      {!isSecure && (
+        <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded-lg text-red-200 shadow-md">
+          <strong>⚠️ Security Warning:</strong> You are not using a secure
+          connection (HTTPS). Your passwords and sensitive data may be at risk
+          of interception. Consider switching to a secure connection before
+          managing passwords.
+        </div>
+      )}{" "}
       <section className="rounded-lg p-6 shadow-[0_0_5px_0_rgba(255,255,255,0.5)]">
         <CredentialList
           credentials={credentials}
@@ -153,15 +175,22 @@ const PasswordManager: React.FC = () => {
           onAddNew={() => setShowAddCredentialModal(true)}
           onCredentialClick={handleCredentialClick}
         />
-      </section>
 
+        <BackupRestore
+          credentials={credentials}
+          onRestore={(restoredCredentials) => {
+            // Update the SWR cache with restored credentials
+            mutate(`/credentials/user/${userId}`, restoredCredentials, false);
+            showSuccessToast("Credentials restored successfully");
+          }}
+        />
+      </section>
       <Modal
         isOpen={showAddCredentialModal}
         onClose={() => setShowAddCredentialModal(false)}
       >
         <AddPwd onAddCredential={handleAddCredential} />
       </Modal>
-
       <Modal
         isOpen={selectedCredential !== null}
         onClose={() => setSelectedCredential(null)}
