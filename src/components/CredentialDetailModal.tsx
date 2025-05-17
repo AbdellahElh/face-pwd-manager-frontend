@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { CredentialEntry } from "../models/Credential";
 import { showErrorToast, showSuccessToast } from "../utils/toastUtils";
+import PasswordStrengthMeter from "./PasswordStrengthMeter";
 import {
   ClipboardIcon,
   ExternalLinkIcon,
@@ -196,6 +197,7 @@ const CredentialDetailModal: React.FC<CredentialDetailModalProps> = ({
               Password
             </label>
             <div className="relative">
+               {" "}
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
@@ -204,6 +206,9 @@ const CredentialDetailModal: React.FC<CredentialDetailModalProps> = ({
                 onChange={handleInputChange}
                 className="w-full p-2 pr-20 bg-[#181818] border border-gray-600 rounded-lg focus:outline-none focus:border-blue-600"
               />
+              {isEditing && (
+                <PasswordStrengthMeter password={formData.password} />
+              )}
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-2">
                 {" "}
                 <button
