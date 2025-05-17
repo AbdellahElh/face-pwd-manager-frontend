@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { CredentialEntry } from "../models/Credential";
 import { showErrorToast, showSuccessToast } from "../utils/toastUtils";
-import PasswordStrengthMeter from "./PasswordStrengthMeter";
 import {
   ClipboardIcon,
   ExternalLinkIcon,
@@ -9,6 +8,7 @@ import {
   EyeOffIcon,
   TrashIcon,
 } from "./icons/Icons";
+import PasswordStrengthMeter from "./PasswordStrengthMeter";
 
 interface CredentialDetailModalProps {
   credential: CredentialEntry;

@@ -1,8 +1,8 @@
 // src/components/AddCredential.tsx
 import React, { useState } from "react";
 import generateStrongPassword from "./GeneratePwd";
-import PasswordStrengthMeter from "./PasswordStrengthMeter";
 import { EyeIcon, EyeOffIcon, PlusIcon } from "./icons/Icons";
+import PasswordStrengthMeter from "./PasswordStrengthMeter";
 
 interface AddCredentialProps {
   onAddCredential: (
