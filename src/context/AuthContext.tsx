@@ -9,6 +9,7 @@ import React, {
 import { post, setAuthToken } from "../data/apiClient";
 import { LoginResponse, User } from "../models/User";
 import { getUserEncryptionKey } from "../utils/cryptoUtils";
+import { createEncryptedImageFormData } from "../utils/imageEncryptionUtils";
 
 interface AuthContextValue {
   user: User | null;
@@ -48,13 +49,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     if (!user) return null;
     return getUserEncryptionKey(user.id, user.email);
   }, [user]);
-
   const login = async (email: string, selfie?: Blob) => {
-    const formData = new FormData();
-    formData.append("email", email);
+    let formData: FormData;
+
     if (selfie) {
-      formData.append("selfie", selfie, "selfie.jpg");
+      // Create a temporary encryption key for login
+      // We use a combination of email and app secret to derive this key
+      const tempEncryptionKey = `pwd-manager-temp-${email}-${
+        import.meta.env.VITE_SECRET_KEY
+      }`;
+
+      // Create encrypted form data with the selfie
+      formData = await createEncryptedImageFormData(
+        selfie,
+        tempEncryptionKey,
+        "selfie",
+        { email }
+      );
+    } else {
+      // If no selfie is provided, just send the email
+      formData = new FormData();
+      formData.append("email", email);
     }
+
     const response = await post<FormData, LoginResponse>(
       "/users/login",
       formData

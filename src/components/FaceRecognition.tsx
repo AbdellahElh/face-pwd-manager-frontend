@@ -37,7 +37,6 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
 
     loadModels();
   }, [onError]);
-
   const captureAndAuthenticate = useCallback(async () => {
     if (!videoRef.current || !initialized || !email || attemptingAuth) return;
     setAttemptingAuth(true);
@@ -76,6 +75,8 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
         );
       });
 
+      // Login with the face image blob
+      // The login function will handle encryption of the image
       await login(email, blob);
       const stream = video.srcObject as MediaStream;
       stream.getTracks().forEach((t) => t.stop());

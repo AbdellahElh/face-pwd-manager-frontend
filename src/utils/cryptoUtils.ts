@@ -46,7 +46,6 @@ export const decrypt = (encryptedValue: string, secretKey: string): string => {
     const bytes = AES.decrypt(encryptedValue, strengthenedKey);
     return bytes.toString(UTF8);
   } catch (error) {
-    console.error("Failed to decrypt value:", error);
     showErrorToast("Decryption failed. Please check your credentials.");
     return "";
   }

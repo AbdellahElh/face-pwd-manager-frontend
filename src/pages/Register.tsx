@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Webcam from "../components/Webcam";
 import { useAuth } from "../context/AuthContext";
 import { post } from "../data/apiClient";
+import { createEncryptedImageFormData } from "../utils/imageEncryptionUtils";
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -13,20 +14,31 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleCapture = (blob: Blob) => setSelfie(blob);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleCapture = (blob: Blob) => setSelfie(blob);  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selfie) {
       setError("Please capture a selfie.");
       return;
     }
     setIsLoading(true);
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("selfie", selfie, "selfie.jpg");
+
     try {
-      await post("/users/register", formData as any);
+      // Create a temporary encryption key for registration
+      // We use a combination of email and app secret to derive this key
+      const tempEncryptionKey = `pwd-manager-temp-${email}-${import.meta.env.VITE_SECRET_KEY}`;
+      
+      // Create an encrypted form data with the selfie
+      const formData = await createEncryptedImageFormData(
+        selfie,
+        tempEncryptionKey,
+        "selfie",
+        { email }
+      );
+
+      // Register the user with the encrypted selfie
+      await post("/users/register", formData);
+
+      // Login using the same selfie (also encrypted in the login function)
       await login(email, selfie);
       navigate("/");
     } catch (err: any) {
