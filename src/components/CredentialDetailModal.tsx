@@ -197,7 +197,6 @@ const CredentialDetailModal: React.FC<CredentialDetailModalProps> = ({
               Password
             </label>
             <div className="relative">
-               {" "}
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
