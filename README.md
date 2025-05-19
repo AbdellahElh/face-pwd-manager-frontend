@@ -9,23 +9,24 @@ This project is a browser-based password management application enhanced with fa
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Security Considerations](#security-considerations)
-- [Recommended Practices](#recommended-practices)
 - [Troubleshooting](#troubleshooting)
+- [Security Documentation](#security-documentation)
+- [Implementation Details](#implementation-details)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Features
 
 - **Face Recognition Authentication:**  
-  Users are authenticated via their webcam. After the face models load and the user’s face matches the stored descriptor, access is granted to the password manager.
+  Users are authenticated via their webcam. After the face models load and the user's face matches the stored descriptor, access is granted to the password manager. The system uses face-api.js for accurate face detection and matching.
 - **Secure Password Storage:**  
-  Passwords are encrypted before being stored (e.g., using `crypto-js`) and can be safely retrieved only after successful authentication.
+  Passwords are encrypted before being stored using industry-standard encryption algorithms and can be safely retrieved only after successful authentication.
 
 - **User-Friendly Interface:**  
   A simple, clean UI allows you to add, view, and manage stored passwords with ease.
 
-- **Local-Only Operation:**  
-  All data (face descriptors, encrypted passwords) is stored locally in the browser, ensuring that no sensitive information leaves your machine.
+- **Secure Architecture:**  
+  The application uses a modern client-server architecture with end-to-end encryption. Face descriptors and encrypted credentials are stored securely, with sensitive data never transmitted or stored as plaintext.
 
 ## Prerequisites
 
@@ -41,88 +42,173 @@ This project is a browser-based password management application enhanced with fa
 
 ## Installation
 
-1. **Clone the Repository:**
+1. **Clone the Repositories:**
 
    ```bash
-   git clone https://github.com/your-username/web-browser-pwd-manager-face-auth.git
-   cd web-browser-pwd-manager-face-auth
+   # Clone backend repository
+   git clone https://github.com/AbdellahElh/pwd-manager-backend.git
+
+   # Clone frontend repository
+   git clone https://github.com/AbdellahElh/pwd-manager-frontend.git
    ```
 
 2. **Install Dependencies:**
 
+   Backend:
+
    ```bash
+   cd pwd-manager-backend
    npm install
    ```
 
-3. **Build the frontend:**
+   Frontend:
 
    ```bash
-   npm run build
+   cd pwd-manager-frontend
+   npm install
    ```
 
-or, for development with hot-reloading:
+3. **Set up Environment Files:**
 
-```bash
-npm run dev
-```
+   Create `.env` files for both repositories using the provided examples:
+
+   Backend (create `.env` file based on `.env.example`):
+
+   ```bash
+   # Copy example env file
+   cp .env.example .env
+   # Then edit the .env file with your settings
+   ```
+
+   Frontend (create `.env` file based on `.env.example`):
+
+   ```bash
+   # Copy example env file
+   cp .env.example .env
+   # Then edit the .env file with your settings
+   ```
+
+4. **Set up the Database:**
+
+   ```bash
+   cd pwd-manager-backend
+   npx prisma migrate dev
+   npx prisma generate
+   ```
+
+5. **Start the Development Servers:**
+
+   Backend:
+
+   ```bash
+   cd pwd-manager-backend
+   npm run dev
+   ```
+
+   Frontend (in a separate terminal):
+
+   ```bash
+   cd pwd-manager-frontend
+   npm run dev
+   ```
 
 ## Configuration
 
+- **Environment Variables:**
+
+  Backend (in `.env`):
+
+  ```
+  DATABASE_URL="file:./dev.db"
+  PORT=3000
+  JWT_SECRET="your_jwt_secret_key_here"
+  NODE_ENV="development"
+  ENFORCE_HTTPS="false"
+  ENCRYPTION_SALT="random_hex_string_32_chars"
+  APP_SECRET_KEY="app-secret-key-for-encryption-DO-NOT-SHARE"
+  ```
+
+  Frontend (in `.env`):
+
+  ```
+  VITE_SECRET_KEY="secret-key-same-as-backend-APP_SECRET_KEY"
+  VITE_BACKEND_URL="http://localhost:3000/api"
+  VITE_ENCRYPTION_SALT="same-as-backend-ENCRYPTION_SALT"
+  ```
+
 - **Face Recognition Models:**
-  Download the required face-api.js models and place them in a `/models` directory in the `public` folder. For example:
-  ```arduino
-  public/
-  models/
+  The required face-api.js models are already included in the repository in both the frontend and backend public directories:
+  ```
+  /models
     face_recognition_model-weights_manifest.json
     face_recognition_model-shard1
+    face_recognition_model-shard2
     ssd_mobilenetv1_model-weights_manifest.json
     ssd_mobilenetv1_model-shard1
+    ssd_mobilenetv1_model-shard2
     face_landmark_68_model-weights_manifest.json
     face_landmark_68_model-shard1
-  images/
-    user1.jpg
   ```
 
 ## Security Considerations
 
-- **Local Encryption:**  
-  Passwords are encrypted before storage to prevent easy reading even if someone opens Developer Tools.
-- **No Server Storage:**  
-  Since everything runs locally, the risk of server-side breaches is eliminated. However, if someone gains physical access to your machine, they might still attempt to extract passwords.
+- **End-to-End Encryption:**  
+  All sensitive data (passwords, usernames, face images) are encrypted using AES-256 encryption before transmission or storage. Face images are encrypted client-side before being sent to the server for processing.
+- **Unique User Keys:**  
+  Each user gets a unique encryption key derived from their user ID and email, ensuring that even if data is leaked, it cannot be easily decrypted without user-specific information.
+- **Biometric Data Protection:**  
+  Face images are encrypted during transmission, and only the mathematical face descriptors (not actual images) are stored long-term. These descriptors cannot be reversed to recreate face images.
 
-- **Use HTTPS in Production:**  
-  For webcam access and security, serve the application over HTTPS. Modern browsers often require a secure context for `getUserMedia`.
-
-## Recommended Practices
-
-- **Optimize Reference Image:**  
-  Use a high-quality, well-lit image for face recognition (`user1.jpg`). Consider resizing and compressing it to improve performance.
-
-- **Improve Performance:**
-  Experiment with shorter detection intervals (e.g., 300-500ms) for faster authentication but be mindful of CPU usage.
-
-- **Regular Backups:**
-  While local storage is convenient, consider exporting your encrypted passwords periodically.
+- **HTTPS Enforcement:**  
+  Both frontend and backend enforce HTTPS connections in production environments, with automatic redirects from HTTP to HTTPS. See [HTTPS Setup Guide](docs/HTTPS_SETUP.md) for detailed instructions.
+- **Security Warnings:**  
+  The application displays clear security warnings when used over insecure connections, ensuring users are aware of potential risks.
 
 ## Troubleshooting
 
-- **Webcam Not Accessible:**  
-  Check browser permissions. For local development, try `localhost` or a secure context (`https://127.0.0.1`).
+- **Login Authentication Issues:**
 
-- **Authentication Slow or Inaccurate:**
+  - If face recognition fails, ensure good lighting and proper face positioning.
+  - Try refreshing the page if the camera doesn't start automatically.
+  - Clear browser cache and cookies if persistent problems occur.
 
-  - Ensure good lighting and face visibility.
-  - Try a clearer reference image.
-  - Increase CPU/GPU power (close background apps) or reduce image size.
+- **Backend Connection Issues:**
+  - Ensure both frontend and backend servers are running.
+  - Check that the frontend is correctly configured to connect to the backend URL.
+  - Verify that your firewall or security software isn't blocking connections.
 
-- **No `'play'` Event Triggered:**
-  If face recognition doesn’t start, ensure that:
-  - The video element is correctly referenced by `videoRef`.
-  - The `FaceRecognition` component checks if the video is already playing.
+## Security Documentation
+
+For a detailed explanation of all security features implemented in this application, please refer to our [Security Guide](docs/SECURITY.md). This comprehensive document covers:
+
+- End-to-end encryption implementation details
+- Key derivation and strengthening techniques
+- Biometric data security measures
+- HTTPS enforcement mechanisms
+- Best practices for users and administrators
+
+Additional security documents:
+
+- [Encryption Implementation](docs/ENCRYPTION.md)
+- [Face Encryption](docs/FACE_ENCRYPTION.md)
+
+## Implementation Details
+
+This project implements a secure password manager using a modern client-server architecture with facial recognition for authentication. The system was developed with security as the primary focus, using industry-standard encryption and biometric verification techniques.
+
+### Key Implementation Features
+
+- **Face Recognition System**: Implemented using face-api.js, which extracts 128-dimensional face descriptors for highly accurate face matching
+- **End-to-End Encryption**: All sensitive data is encrypted client-side using AES-256-CBC with PBKDF2 key derivation
+- **Secure Architecture**: Clear separation between frontend (React) and backend (Node.js/Express) with encrypted communication
+- **Database Design**: Efficient schema using Prisma ORM with SQLite for persistent storage
+- **Security Measures**: HTTPS enforcement, protection against common web vulnerabilities, and secure credential handling
+
+For a comprehensive breakdown of the implementation, including technical architecture, algorithms used, development approach, and challenges overcome during development, please refer to our [Implementation Documentation](docs/IMPLEMENTATION.md).
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request on GitHub. Ensure that your code passes lint checks and that you’ve tested your changes thoroughly before proposing them.
+Contributions are welcome! Please open an issue or submit a pull request on GitHub. Ensure that your code passes lint checks and that you've tested your changes thoroughly before proposing them.
 
 ## License
 
