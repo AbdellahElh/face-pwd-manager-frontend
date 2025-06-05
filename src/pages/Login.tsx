@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FaceRecognition from "../components/FaceRecognition";
 import Webcam from "../components/Webcam";
+import Error from "../components/ui/Error";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -88,11 +89,7 @@ const Login: React.FC = () => {
               required
             />
           </div>{" "}
-          {error && (
-            <div className="text-[var(--color-text-error)] bg-[var(--color-bg-error)] p-2 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
+          {error && <Error message={error} onDismiss={() => setError("")} />}
           <div className="flex justify-between gap-4 pt-2">
             <button
               type="submit"
@@ -134,12 +131,8 @@ const Login: React.FC = () => {
         />
         <p className="text-[var(--color-text-secondary)] mt-1 text-center text-sm">
           Please position your face within the camera view to authenticate.
-        </p>
-        {error && (
-          <div className="text-[var(--color-text-error)] bg-[var(--color-bg-error)] p-2 rounded-lg text-sm w-full">
-            {error}
-          </div>
-        )}{" "}
+        </p>{" "}
+        {error && <Error message={error} onDismiss={() => setError("")} />}{" "}
         <button
           onClick={resetLogin}
           className="mt-2 px-6 py-2.5 rounded-[14px] bg-gray-50 text-gray-800 border border-gray-300 hover:bg-gray-100 transition-colors duration-300 w-full font-medium"

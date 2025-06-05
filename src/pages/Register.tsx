@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Webcam from "../components/Webcam";
+import Error from "../components/ui/Error";
+import Loader from "../components/ui/Loader";
 import { useAuth } from "../context/AuthContext";
 import { post } from "../data/apiClient";
 import { createEncryptedImageFormData } from "../utils/imageEncryptionUtils";
@@ -14,7 +16,8 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleCapture = (blob: Blob) => setSelfie(blob);  const handleSubmit = async (e: React.FormEvent) => {
+  const handleCapture = (blob: Blob) => setSelfie(blob);
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selfie) {
       setError("Please capture a selfie.");
@@ -25,8 +28,10 @@ const Register: React.FC = () => {
     try {
       // Create a temporary encryption key for registration
       // We use a combination of email and app secret to derive this key
-      const tempEncryptionKey = `pwd-manager-temp-${email}-${import.meta.env.VITE_SECRET_KEY}`;
-      
+      const tempEncryptionKey = `pwd-manager-temp-${email}-${
+        import.meta.env.VITE_SECRET_KEY
+      }`;
+
       // Create an encrypted form data with the selfie
       const formData = await createEncryptedImageFormData(
         selfie,
@@ -43,7 +48,9 @@ const Register: React.FC = () => {
       navigate("/");
     } catch (err: any) {
       console.error("Register error:", err);
-      setError(err.response?.data?.message || "Registration failed");
+      setError(
+        err.response?.data?.message || err.message || "Registration failed"
+      );
       setIsLoading(false);
     }
   };
@@ -91,12 +98,8 @@ const Register: React.FC = () => {
               ✓ Photo captured successfully! You can now create your account.
             </div>
           )}
-        </div>
-        {error && (
-          <div className="text-[var(--color-text-error)] bg-[var(--color-bg-error)] p-2 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
+        </div>{" "}
+        {error && <Error message={error} onDismiss={() => setError("")} />}
         <div className="pt-2">
           {" "}
           <button
@@ -104,8 +107,9 @@ const Register: React.FC = () => {
             disabled={isLoading || !selfie}
             className="group relative inline-flex items-center justify-center px-6 py-2.5 font-medium rounded-[14px] bg-[var(--color-bg-button)] text-white border border-[var(--color-border-accent)] shadow-[0_0_10px_1px_var(--color-shadow-button)] hover:shadow-[0_0_15px_3px_var(--color-shadow-button-hover)] transition-all duration-300 w-full disabled:bg-gray-700 disabled:border-gray-600 disabled:shadow-none disabled:cursor-not-allowed"
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-cyan-700/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[14px]"></span>
-            <span className="relative z-10 font-semibold tracking-wide">
+            <span className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-cyan-700/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[14px]"></span>{" "}
+            <span className="relative z-10 font-semibold tracking-wide flex items-center gap-2">
+              {isLoading && <Loader />}
               {isLoading
                 ? "Processing..."
                 : selfie

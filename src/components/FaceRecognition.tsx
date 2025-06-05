@@ -83,7 +83,9 @@ const FaceRecognition: React.FC<FaceRecognitionProps> = ({
       onAuthenticated();
     } catch (err: any) {
       console.error("Auth error:", err);
-      onError(err.message || "Authentication failed. Please try again.");
+      onError(
+        err.response?.data?.message || err.message || "Authentication failed"
+      );
       setAttemptingAuth(false);
     }
   }, [

@@ -4,7 +4,6 @@ export interface User {
   id: number;
   email: string;
   token?: string;
-  faceImage?: string;
 }
 
 export interface LoginResponse {
