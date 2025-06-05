@@ -79,7 +79,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     const loggedInUser: User = {
       id: response.user.id,
       email: response.user.email,
-      faceImage: response.user.faceImage,
       token: response.token,
     };
     setAuthToken(response.token);

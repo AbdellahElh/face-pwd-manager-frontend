@@ -3,6 +3,7 @@ import useSWR, { mutate } from "swr";
 import AddPwd from "../components/AddCredential";
 import CredentialDetailModal from "../components/CredentialDetailModal";
 import CredentialList from "../components/CredentialList";
+import ImportExportModal from "../components/ImportExportModal";
 import Modal from "../components/Modal";
 import { useAuth } from "../context/AuthContext";
 import { CredentialEntry } from "../models/Credential";
@@ -12,13 +13,15 @@ import {
   fetchCredentials,
   updateCredential,
 } from "../services/credentialService";
+import { ImportCredential } from "../utils/importExportUtils";
 import { showErrorToast, showSuccessToast } from "../utils/toastUtils";
 
 const PasswordManager: React.FC = () => {
   const { user, isLoggedIn, encryptionKey } = useAuth();
-
   const userId = user?.id;
   const [showAddCredentialModal, setShowAddCredentialModal] =
+    useState<boolean>(false);
+  const [showImportExportModal, setShowImportExportModal] =
     useState<boolean>(false);
   const [selectedCredential, setSelectedCredential] =
     useState<CredentialEntry | null>(null);
@@ -50,13 +53,13 @@ const PasswordManager: React.FC = () => {
       showErrorToast("Authentication error. Please log in again.");
       return;
     }
-
     try {
       const newCredential = {
         website,
         title,
         username,
         password,
+        userId: userId,
       };
 
       const createdEntry = await createCredential(
@@ -80,18 +83,17 @@ const PasswordManager: React.FC = () => {
       showErrorToast("Failed to add credential");
     }
   };
-
   const handleUpdateCredential = async (updatedCredential: CredentialEntry) => {
-    if (!encryptionKey) {
+    if (!encryptionKey || !userId) {
       showErrorToast("Authentication error. Please log in again.");
       return;
     }
 
     try {
       // Make sure userId is included in the update
-      const credentialToUpdate = {
+      const credentialToUpdate: CredentialEntry = {
         ...updatedCredential,
-        userId,
+        userId: userId,
       };
 
       const updated = await updateCredential(credentialToUpdate, encryptionKey);
@@ -136,6 +138,55 @@ const PasswordManager: React.FC = () => {
     setSelectedCredential(credential);
   };
 
+  const handleImportCredentials = async (
+    importedCredentials: ImportCredential[]
+  ) => {
+    if (!userId || !encryptionKey) {
+      showErrorToast("Authentication error. Please log in again.");
+      return;
+    }
+
+    try {
+      let successCount = 0;
+      let failureCount = 0;
+
+      for (const importedCred of importedCredentials) {
+        try {
+          await createCredential(
+            {
+              website: importedCred.website,
+              title: importedCred.title || "",
+              username: importedCred.username,
+              password: importedCred.password,
+              userId: userId,
+            },
+            userId,
+            encryptionKey
+          );
+          successCount++;
+        } catch (error) {
+          console.error("Failed to import credential:", error);
+          failureCount++;
+        }
+      }
+
+      // Refresh the credentials list
+      mutate(`/credentials/user/${userId}`);
+
+      if (successCount > 0) {
+        showSuccessToast(
+          `Successfully imported ${successCount} credential(s)` +
+            (failureCount > 0 ? ` (${failureCount} failed)` : "")
+        );
+      } else {
+        showErrorToast("Failed to import any credentials");
+      }
+    } catch (error) {
+      console.error("Error importing credentials:", error);
+      showErrorToast("Failed to import credentials");
+    }
+  };
+
   return (
     <div>
       {error && (
@@ -143,8 +194,8 @@ const PasswordManager: React.FC = () => {
           Error loading credentials. Please try again.
         </div>
       )}
-
       <section className="rounded-lg p-6 shadow-[0_0_5px_0_rgba(255,255,255,0.5)]">
+        {" "}
         <CredentialList
           credentials={credentials}
           visiblePasswords={visiblePasswords}
@@ -152,16 +203,25 @@ const PasswordManager: React.FC = () => {
           onDelete={handleDeleteCredential}
           onAddNew={() => setShowAddCredentialModal(true)}
           onCredentialClick={handleCredentialClick}
+          onImportExport={() => setShowImportExportModal(true)}
         />
-      </section>
-
+      </section>{" "}
       <Modal
         isOpen={showAddCredentialModal}
         onClose={() => setShowAddCredentialModal(false)}
       >
         <AddPwd onAddCredential={handleAddCredential} />
       </Modal>
-
+      <Modal
+        isOpen={showImportExportModal}
+        onClose={() => setShowImportExportModal(false)}
+      >
+        <ImportExportModal
+          credentials={credentials}
+          onImport={handleImportCredentials}
+          onClose={() => setShowImportExportModal(false)}
+        />
+      </Modal>
       <Modal
         isOpen={selectedCredential !== null}
         onClose={() => setSelectedCredential(null)}
